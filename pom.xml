@@ -15,7 +15,12 @@
 	<description>Map Maven / Spring Boot Profiles</description>
 
 	<properties>
+		<ant-contrib.version>20020829</ant-contrib.version>
 		<java.version>1.8</java.version>
+		<maven.antrun.plugin.version>3.0.0</maven.antrun.plugin.version>
+		<src-res-path>src/main/resources</src-res-path>
+		<src-local-props>src/main/resources/application-local.properties</src-local-props>
+		<src-local-props-template>src/main/resources/templates/application-local.template</src-local-props-template>
 	</properties>
 
 	<dependencies>
@@ -45,7 +50,7 @@
 					<artifactId>junit-vintage-engine</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
+		</dependency>		
 	</dependencies>
 
 	<build>
@@ -53,6 +58,40 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin><!-- https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-resources-plugin -->
+			<plugin>
+			    <!-- <groupId>org.apache.maven.plugins</groupId> -->
+			    <artifactId>maven-antrun-plugin</artifactId>
+				<version>${maven.antrun.plugin.version}</version>
+				<dependencies>
+					<dependency>
+					    <groupId>ant-contrib</groupId>
+					    <artifactId>ant-contrib</artifactId>
+					    <version>${ant-contrib.version}</version>
+					</dependency>
+				</dependencies>
+			    <executions>
+			    	<execution>
+			    		<id>copy-default-template-if-local-props-missing</id>
+			    		<phase>generate-sources</phase>
+			    		<goals>
+			    			<goal>run</goal>
+			    		</goals>
+			    		<configuration>
+			    			<target>
+			    				<taskdef resource="net/sf/antcontrib/antcontrib.properties" />
+				    			<if>
+				    				<not>
+				    					<available file="${project.basedir}/${src-local-props}" />
+				    				</not>
+				    				<then>
+				    					<copy file="${project.basedir}/${src-local-props-template}" toFile="${project.basedir}/${src-local-props}" />
+				    				</then>
+				    			</if>
+			    			</target>
+			    		</configuration>
+			    	</execution>
+			    </executions>
 			</plugin>
 		</plugins>
 	</build>
